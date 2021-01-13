@@ -1,0 +1,58 @@
+#include<avr/power.h>
+#include<avr/sleep.h>
+#include<avr/wdt.h>
+#include<MsTimer2.h>
+
+int contador = 0; 
+int pul = 0; 
+int timer = 0; 
+
+
+void setup() {
+  Serial.begin(9600);
+  MsTimer2::set(1500,reloj);
+  attachInterrupt(0,on,LOW);
+}
+
+void loop() {
+  delay(1500);
+}
+
+void on(){
+  switch(pul){
+
+    case 0:
+      timer = 60;
+      Serial.println("sistema acctivado");
+      MsTimer2::start();
+      pul++;
+    break;
+
+    case 1:
+      Serial.println("sistema apagado");
+      timer= 0;
+      pul = 0;
+      contador = 0;
+      MsTimer2::stop();
+      power_adc_disable();
+    break;
+  }
+}
+
+void reloj(){
+  if(contador != 1){
+    power_adc_disable();
+  }
+  else{
+    power_adc_enable();
+    delay(200);
+    Serial.println(String("Lectura: ")+String(analogRead(0)));
+  }
+
+  if(contador == 60){
+    contador = 0;
+  }
+  
+  contador++;
+  power_adc_disable();     
+}
